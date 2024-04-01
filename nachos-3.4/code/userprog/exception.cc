@@ -432,7 +432,7 @@ ExceptionHandler(ExceptionType which)
                     ReadFloat();
 
                 case SC_PrintFloat:
-                    PrintFloat(*(float*)&machine->ReadRegister(4)); //Convert int -> float with the same binary representation
+                    PrintFloat(*(float*)&(machine->ReadRegister(4))); //Convert int -> float with the same binary representation
 
                 case SC_ReadChar:
                     ReadChar();
