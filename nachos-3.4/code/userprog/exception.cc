@@ -235,7 +235,7 @@ void PrintFloat(float number)
 {
     // Max Length of a float is 328 
     const int MAX_LEN = 328;
-    long long natural;
+    int natural;
     char* buffer = new char[MAX_LEN + 1];
     int startPoint = 0;
     float digit;
@@ -260,22 +260,25 @@ void PrintFloat(float number)
     // check if natural is 0
     else if (natural == 0)
     {
-        buffer[0] = '0';
-        buffer[1] = '.';
-        startPoint = 2;
+        buffer[startPoint++] = '0';
     }
-    // Read reversed natural
-    while(natural > 0)
+
+    // Read reversed natural (natural > 0)
+    if(natural > 0)
     {
-        digit = natural  % 10;
-        rev[numOfDigit++] = (char)(digit + 48);
-        natural /= 10;
+        while(natural > 0)
+        {
+            digit = natural  % 10;
+            rev[numOfDigit++] = (char)(digit + 48);
+            natural /= 10;
+        }
+        // Reverse the string to get right natural part
+        while(numOfDigit > 0)
+        {
+            buffer[startPoint++] = rev[--numOfDigit];
+        }
     }
-    // Reverse the string no get right natural part
-    while(numOfDigit >= 0)
-    {
-        buffer[startPoint++] = rev[--numOfDigit];
-    }
+
     delete [] rev;
 
     // Start reading the decimal part
@@ -432,10 +435,10 @@ ExceptionHandler(ExceptionType which)
                     ReadFloat();
 
                 case SC_PrintFloat:
-			{
-				int number = machine->ReadRegister(4);
+                {
+                    int number = machine->ReadRegister(4);
                     PrintFloat(*(float*)&number); //Convert int -> float with the same binary representation
-			}
+                }
 
                 case SC_ReadChar:
                     ReadChar();
@@ -532,7 +535,7 @@ ExceptionHandler(ExceptionType which)
                     {
                         machine->WriteRegister(2, -1);
                         printf("\nAlready opened 10 files. No more space to open new file.");
-                        delete filename;
+                        delete [] filename;
                         AdvancePC();
                         return;
                     }
@@ -540,14 +543,14 @@ ExceptionHandler(ExceptionType which)
                     if (type == 2)
                     {
                         machine->WriteRegister(2, 0);
-                        delete filename;
+                        delete [] filename;
                         AdvancePC();
                         return;
                     }
                     else if (type == 3)
                     {
                         machine->WriteRegister(2, 1);
-                        delete filename;
+                        delete [] filename;
                         AdvancePC();
                         return;
                     }
@@ -556,7 +559,7 @@ ExceptionHandler(ExceptionType which)
                     {
                         printf("\nInvalid file type");
                         machine->WriteRegister(2, -1);
-                        delete filename;
+                        delete [] filename;
                         AdvancePC();
                         return;
                     }
@@ -571,7 +574,7 @@ ExceptionHandler(ExceptionType which)
                         //printf("\nCannot open file %s", filename);
                         machine->WriteRegister(2, -1);
                     }
-                    delete filename;
+                    delete [] filename;
                     AdvancePC();
                     return;
                 }
@@ -649,7 +652,7 @@ ExceptionHandler(ExceptionType which)
                         System2User(virtAddr, size, buffer);
                         // Return true size
                         machine->WriteRegister(2, size);
-                        delete buffer;
+                        delete [] buffer;
                         AdvancePC();
                         return;
                     }
@@ -668,7 +671,7 @@ ExceptionHandler(ExceptionType which)
                     {
                         machine->WriteRegister(2, -2);
                     }
-                    delete buffer;
+                    delete [] buffer;
                     AdvancePC();
                     return;
                 }
@@ -721,7 +724,7 @@ ExceptionHandler(ExceptionType which)
                         gSynchConsole->Write(buffer + size, 1);
                         // Return the true amount of byte written
                         machine->WriteRegister(2, size);
-                        delete buffer;
+                        delete [] buffer;
                         AdvancePC();
                         return;
                     }
@@ -729,16 +732,12 @@ ExceptionHandler(ExceptionType which)
                     int size = fileSystem->openfile[id]->Write(buffer, charcount);
                     // Write on read-and-write file
                     if (size > 0)
-                    {
-                        
                         // Return true size
                         machine->WriteRegister(2, size);
-                    }
                     else
-                    {
                         machine->WriteRegister(2, -2);
-                    }
-                    delete buffer;
+
+                    delete [] buffer;
                     AdvancePC();
                     return;
                 }
@@ -794,8 +793,8 @@ ExceptionHandler(ExceptionType which)
                         System2User(virtAddr, 1, "0");
                         machine->WriteRegister(2, 1);
                         AdvancePC();
-                        delete buffer;
-                        delete rev;
+                        delete [] buffer;
+                        delete [] rev;
                         return;
                     }
                     // Read reversed number
@@ -813,11 +812,12 @@ ExceptionHandler(ExceptionType which)
                     System2User(virtAddr, startPoint, buffer);
                     machine->WriteRegister(2, startPoint);
                     AdvancePC();
-                    delete buffer;
-                    delete rev;
+                    delete [] buffer;
+                    delete [] rev;
                     return;
                 }
                 return;
             }
+
     }
 }
