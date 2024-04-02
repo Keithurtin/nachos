@@ -235,6 +235,7 @@ void PrintFloat(float number)
 {
     // Max Length of a float is 328 
     const int MAX_LEN = 328;
+    char countDecimal = 0;
     int natural;
     char* buffer = new char[MAX_LEN + 1];
     int startPoint = 0;
@@ -283,6 +284,14 @@ void PrintFloat(float number)
 
     // Start reading the decimal part
     buffer[startPoint++] = '.';
+
+    //Reset natural
+    natural = (int)number;
+    if (natural > number && number > 0)
+        natural--;
+    else if (natural < number && number < 0)
+        natural++;
+
     number = number - natural;    // Take decimal part
     // Check if decimal part is 0
     if (number == 0.0)
@@ -295,7 +304,7 @@ void PrintFloat(float number)
     }
 
     // Read each digit of the decimal part one by one
-    while(number != 0.0)
+    while(number != 0.0 && countDecimal < 6)
     {
         number *= 10;
         natural = (int)number;
@@ -305,6 +314,8 @@ void PrintFloat(float number)
             natural++;
         buffer[startPoint++] = (char)(natural + 48);
         number -= natural;
+
+        countDecimal++;
     }
 
     gSynchConsole->Write(buffer, startPoint);
@@ -818,6 +829,5 @@ ExceptionHandler(ExceptionType which)
                 }
                 return;
             }
-
     }
 }
