@@ -70,12 +70,72 @@ void mergesort(float arr[], int l, int r)
 }
 //Source code from: "https://www.geeksforgeeks.org/merge-sort/"
 
+/*Save the floating point f to the file id
+*/
+void SaveFloat2File(float f, OpenFileId id)
+{
+	// Max Length of a float is 328 
+	int MAX_LEN = 328;
+	char* reverse = new char[MAX_LEN + 1];
+	char* buffer = new char[MAX_LEN + 1];
+	int bufferPos = 0, reversePos = 0;
+	char decimalCount = 0;
+	int natural;
+
+	if(f < 0)
+	{
+		buffer[bufferPos++] = '-';
+		f = -f;
+	}
+
+	natural = f;
+	if(natural == 0)
+	{
+		buffer[bufferPos++] = '0';
+	}
+	else
+	{
+		while(natural > 0)
+		{
+			reverse[reversePos++] = natural % 10 + '0';
+			natural /= 10;
+		}
+		while (reversePos > 0)
+		{
+			buffer[bufferPos++] = reverse[--reversePos];
+		}
+	}
+	buffer[bufferPos++] = '.';
+	delete [] reverse;
+
+	f -= (int)f;
+	if(f == 0)
+	{
+		buffer[bufferPos++] = '0';
+	}
+	else
+	{
+		while(f != 0 && decimalCount < 6)
+		{
+			f *= 10;
+			natural = f;
+			buffer[bufferPos++] = natural + '0';
+			decimalCount++;
+			f -= natural;
+		}
+	}
+
+	Write(buffer, bufferPos, id);
+	Write("\r\n", 2, id);
+
+	delete [] buffer;
+}
+
 int main()
 {
     int size;
     float array[100];
-	int id;
-	char* buffer;
+	OpenFileId id;
 
     PrintString("Input size: ");
 	size = ReadInt();
@@ -87,5 +147,15 @@ int main()
 
 	mergesort(array, 0, size - 1);
 	
+	CreateFile("mergesort.txt");
+	id = Open("mergesort.txt", 0);
+
+	for(int i = 0; i < size; i++)
+		SaveFloat2File(array[i], id);
+	
+	CloseFile(id);
+	
+	Halt();
+
     return 0;
 }
