@@ -1,7 +1,4 @@
 #include "syscall.h"
-// C program for Merge Sort
-#include <stdio.h>
-#include <stdlib.h>
 
 // Merges two subarrays of arr[].
 // First subarray is arr[l..m]
@@ -13,7 +10,8 @@ void merge(float arr[], int l, int m, int r)
 	int n2 = r - m;
 
 	// Create temp arrays
-	int L[n1], R[n2];
+	int* L = new int[n1];
+	int* R = new int[n2];
 
 	// Copy data to temp arrays L[] and R[]
 	for (i = 0; i < n1; i++)
@@ -52,6 +50,9 @@ void merge(float arr[], int l, int m, int r)
 		j++;
 		k++;
 	}
+
+	delete [] L;
+	delete [] R;
 }
 
 // l is for left index and r is right index of the
