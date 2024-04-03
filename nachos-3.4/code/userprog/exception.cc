@@ -58,305 +58,6 @@ void AdvancePC()
     machine->WriteRegister(NextPCReg, pcAfter);
 }
 
-void Halt()
-{
-    printf("\nShutdown, initiated by user program.");
-    interrupt->Halt();
-	AdvancePC();
-}
-
-int ReadInt()
-{
-    // -2^31 <= integer number <= 2^31 -1
-    // => max length of an int number is 10 + 1 (for "-")
-    const int maxLen = 11;
-    long int num = 0;
-    int numOfDigit = 0;
-    int digit = 0;
-    int mark = 1;
-    int startPoint = 0;
-    char* buffer = new char[maxLen + 1];
-
-    // Read the string of number from console 
-    numOfDigit = gSynchConsole->Read(buffer, maxLen);
-    // Check if number is negative
-    if (buffer[0] == '-')
-    {
-        mark = -1;
-        startPoint++;
-    }
-
-    // Read each digit and combine into an integer
-    for (int i = startPoint; i < numOfDigit; i++)
-    {
-        if (buffer[i] >= '0' && buffer[i] <= '9')
-        {
-            digit = (int)(buffer[i] - '0');
-            num = num * 10 + digit;
-        }
-        // User did not input a valid number
-        else
-        {
-            machine->WriteRegister(2, 0);
-            AdvancePC();
-            delete [] buffer;
-            return 0;
-        }
-    }
-    num *= mark;
-    machine->WriteRegister(2, num);
-    AdvancePC();
-    delete [] buffer;
-    return num;
-}
-
-void PrintInt(int number)
-{
-    // -2^31 <= integer number <= 2^31 -1
-    // => max length of an int number is 10 + 1 (for "-")
-    const int maxLen = 11;
-    char* buffer = new char[maxLen + 1];
-    int startPoint = 0;
-    int digit;
-    char* rev = new char[maxLen + 1];// To read reversed number
-    int numOfDigit = 0;
-
-    // If the number is negative
-    // Change number into positive and set first character of the string into "-"
-    // increase starting point of of the string by 1 
-    if (number < 0)
-    {
-        number = -number;
-        buffer[startPoint++] = '-';
-    }
-    // check if number is 0
-    else if (number == 0)
-    {
-        gSynchConsole->Write((char*)"0", 1);
-        AdvancePC();
-        delete [] buffer;
-        delete [] rev;
-        return;
-    }
-
-    // Read reversed number
-    while(number > 0)
-    {
-        digit = number % 10;
-        rev[numOfDigit++] = (char)(digit + 48);
-        number /= 10;
-    }
-    // Reverse the string no get right number
-    while(numOfDigit >= 0)
-    {
-        buffer[startPoint++] = rev[--numOfDigit];
-    }
-    
-    gSynchConsole->Write(buffer, startPoint);
-    AdvancePC();
-    delete [] buffer;
-    delete [] rev;
-}
-
-float ReadFloat()
-{
-    // Max Length of a float is 328 
-    const int MAX_LEN = 328;
-    float num = 0;
-    int numOfDigit = 0;
-    int digit = 0;
-    float mark = 1;
-    int startPoint = 0;
-    int startDecimal = 0;
-    float devisor = 1;
-    char* buffer = new char[MAX_LEN + 1];
-
-    // Read the string of number from console 
-    numOfDigit = gSynchConsole->Read(buffer, MAX_LEN);
-    // Check if number is negative
-    if (buffer[0] == '-')
-    {
-        mark = -1;
-        startPoint++;
-    }
-
-    // Read digits before "."
-    for (int i = startPoint; i < numOfDigit; i++)
-    {
-        if (buffer[i] >= '0' && buffer[i] <= '9')
-        {
-            digit = (int)(buffer[i] - '0');
-            num = num * 10 + digit;
-        }
-        else if (buffer[i] == '.')
-        {
-            startDecimal = i + 1;
-            break;
-        }
-        // User did not input a valid number
-        else
-        {
-            num = 0.0;
-            machine->WriteRegister(2, *(int*)&num);
-            AdvancePC();
-            delete [] buffer;
-            return num;
-        }
-    }
-    // Read digits after "."
-    for (int i = startDecimal; i < numOfDigit; i++)
-    {
-        if (buffer[i] >= '0' && buffer[i] <= '9')
-        {
-            digit = (int)(buffer[i] - '0');
-            devisor *= 10;
-            num += (digit / devisor);
-        }
-        // User did not input a valid number
-        else
-        {
-            num = 0.0;
-            machine->WriteRegister(2, *(int*)&num);
-            AdvancePC();
-            delete [] buffer;
-            return num;
-        }
-    }
-    num *= mark;
-
-    // Get the binary representation of floating point number then convert to integer with the same binary representation
-    machine->WriteRegister(2, *(int*)&num);
-    AdvancePC();
-    delete [] buffer;
-    return num;
-}
-
-void PrintFloat(float number)
-{
-    // Max Length of a float is 328 
-    const int MAX_LEN = 328;
-    char countDecimal = 0;
-    int natural;
-    char* buffer = new char[MAX_LEN + 1];
-    int startPoint = 0;
-    float digit;
-    char* rev = new char[MAX_LEN + 1];// To read reversed number
-    int numOfDigit = 0;
-
-    // Take the natural part of a float number
-    natural = (int)number;
-    if (natural > number && number > 0)
-        natural--;
-    else if (natural < number && number < 0)
-        natural++;
-
-    // Convert natural part into a string
-    // If the number is negative -> change it into positive and set first character of the string into "-"
-    // increase starting point of of the string by 1 
-    if (natural < 0)
-    {
-        natural = -natural;
-        buffer[startPoint++] = '-';
-    }
-    // check if natural is 0
-    else if (natural == 0)
-    {
-        buffer[startPoint++] = '0';
-    }
-
-    // Read reversed natural (natural > 0)
-    if(natural > 0)
-    {
-        while(natural > 0)
-        {
-            digit = natural  % 10;
-            rev[numOfDigit++] = (char)(digit + 48);
-            natural /= 10;
-        }
-        // Reverse the string to get right natural part
-        while(numOfDigit > 0)
-        {
-            buffer[startPoint++] = rev[--numOfDigit];
-        }
-    }
-
-    delete [] rev;
-
-    // Start reading the decimal part
-    buffer[startPoint++] = '.';
-
-    //Reset natural
-    natural = (int)number;
-    if (natural > number && number > 0)
-        natural--;
-    else if (natural < number && number < 0)
-        natural++;
-
-    number = number - natural;    // Take decimal part
-    // Check if decimal part is 0
-    if (number == 0.0)
-    {
-        buffer[startPoint++] = '0';
-        gSynchConsole->Write(buffer, startPoint);
-        delete [] buffer;
-        AdvancePC();
-        return;
-    }
-
-    // Read each digit of the decimal part one by one
-    while(number != 0.0 && countDecimal < 6)
-    {
-        number *= 10;
-        natural = (int)number;
-        if (natural > number && number > 0)
-            natural--;
-        else if (natural < number && number < 0)
-            natural++;
-        buffer[startPoint++] = (char)(natural + 48);
-        number -= natural;
-
-        countDecimal++;
-    }
-
-    gSynchConsole->Write(buffer, startPoint);
-    AdvancePC();
-    delete [] buffer;
-}
-
-char ReadChar()
-{
-    char c;
-    gSynchConsole->Read(&c, 1);
-    machine->WriteRegister(2, (int)c);
-    AdvancePC();
-    return c;
-}
-
-void PrintChar(char character)
-{
-    gSynchConsole->Write(&character, 1);
-    AdvancePC();
-}
-
-void ReadString(char* buffer, int length)
-{
-    //Read string into user's buffer
-    gSynchConsole->Read(buffer, length);
-
-    delete [] buffer;
-    AdvancePC();
-}
-
-void PrintString(char* buffer)
-{
-    int length = strlen(buffer);
-    // Print string
-    gSynchConsole->Write(buffer, length);
-
-    delete [] buffer;
-    AdvancePC();
-}
-
 char* User2System(int virtAddr, int limit)
 {
     int i;
@@ -434,28 +135,292 @@ ExceptionHandler(ExceptionType which)
    			switch (type)
    			{
      			case SC_Halt:
-       				Halt();
+       			{
+                    printf("\nShutdown, initiated by user program.");
+                    interrupt->Halt();
+                	AdvancePC();
+                }
 
                 case SC_ReadInt:
-                    ReadInt();
+                {
+                    // -2^31 <= integer number <= 2^31 -1
+                    // => max length of an int number is 10 + 1 (for "-")
+                    const int maxLen = 11;
+                    long int num = 0;
+                    int numOfDigit = 0;
+                    int digit = 0;
+                    int mark = 1;
+                    int startPoint = 0;
+                    char* buffer = new char[maxLen + 1];
+
+                    // Read the string of number from console 
+                    numOfDigit = gSynchConsole->Read(buffer, maxLen);
+                    // Check if number is negative
+                    if (buffer[0] == '-')
+                    {
+                        mark = -1;
+                        startPoint++;
+                    }
+
+                    // Read each digit and combine into an integer
+                    for (int i = startPoint; i < numOfDigit; i++)
+                    {
+                        if (buffer[i] >= '0' && buffer[i] <= '9')
+                        {
+                            digit = (int)(buffer[i] - '0');
+                            num = num * 10 + digit;
+                        }
+                        // User did not input a valid number
+                        else
+                        {
+                            machine->WriteRegister(2, 0);
+                            AdvancePC();
+                            delete [] buffer;
+                            return;
+                        }
+                    }
+                    num *= mark;
+                    machine->WriteRegister(2, num);
+                    AdvancePC();
+                    delete [] buffer;
+                    return;
+                }
 
                 case SC_PrintInt:
-                    PrintInt(machine->ReadRegister(4));
+                {
+                    // -2^31 <= integer number <= 2^31 -1
+                    // => max length of an int number is 10 + 1 (for "-")
+                    const int maxLen = 11;
+                    char* buffer = new char[maxLen + 1];
+                    int startPoint = 0;
+                    int digit;
+                    char* rev = new char[maxLen + 1];// To read reversed number
+                    int numOfDigit = 0;
+
+                    //Read register 4 to get the integer
+                    int number = machine->ReadRegister(4);
+
+                    // If the number is negative
+                    // Change number into positive and set first character of the string into "-"
+                    // increase starting point of of the string by 1 
+                    if (number < 0)
+                    {
+                        number = -number;
+                        buffer[startPoint++] = '-';
+                    }
+                    // check if number is 0
+                    else if (number == 0)
+                    {
+                        gSynchConsole->Write((char*)"0", 1);
+                        AdvancePC();
+                        delete [] buffer;
+                        delete [] rev;
+                        return;
+                    }
+
+                    // Read reversed number
+                    while(number > 0)
+                    {
+                        digit = number % 10;
+                        rev[numOfDigit++] = (char)(digit + 48);
+                        number /= 10;
+                    }
+                    // Reverse the string no get right number
+                    while(numOfDigit >= 0)
+                    {
+                        buffer[startPoint++] = rev[--numOfDigit];
+                    }
+                    
+                    gSynchConsole->Write(buffer, startPoint);
+                    AdvancePC();
+                    delete [] buffer;
+                    delete [] rev;
+                    return;
+                }
 
                 case SC_ReadFloat:
-                    ReadFloat();
+                {
+                    // Max Length of a float is 328 
+                    const int MAX_LEN = 328;
+                    float num = 0;
+                    int numOfDigit = 0;
+                    int digit = 0;
+                    float mark = 1;
+                    int startPoint = 0;
+                    int startDecimal = 0;
+                    float devisor = 1;
+                    char* buffer = new char[MAX_LEN + 1];
+
+                    // Read the string of number from console 
+                    numOfDigit = gSynchConsole->Read(buffer, MAX_LEN);
+                    // Check if number is negative
+                    if (buffer[0] == '-')
+                    {
+                        mark = -1;
+                        startPoint++;
+                    }
+
+                    // Read digits before "."
+                    for (int i = startPoint; i < numOfDigit; i++)
+                    {
+                        if (buffer[i] >= '0' && buffer[i] <= '9')
+                        {
+                            digit = (int)(buffer[i] - '0');
+                            num = num * 10 + digit;
+                        }
+                        else if (buffer[i] == '.')
+                        {
+                            startDecimal = i + 1;
+                            break;
+                        }
+                        // User did not input a valid number
+                        else
+                        {
+                            num = 0.0;
+                            machine->WriteRegister(2, *(int*)&num);
+                            AdvancePC();
+                            delete [] buffer;
+                            return;
+                        }
+                    }
+                    // Read digits after "."
+                    for (int i = startDecimal; i < numOfDigit; i++)
+                    {
+                        if (buffer[i] >= '0' && buffer[i] <= '9')
+                        {
+                            digit = (int)(buffer[i] - '0');
+                            devisor *= 10;
+                            num += (digit / devisor);
+                        }
+                        // User did not input a valid number
+                        else
+                        {
+                            num = 0.0;
+                            machine->WriteRegister(2, *(int*)&num);
+                            AdvancePC();
+                            delete [] buffer;
+                            return;
+                        }
+                    }
+                    num *= mark;
+
+                    // Get the binary representation of floating point number then convert to integer with the same binary representation
+                    machine->WriteRegister(2, *(int*)&num);
+                    AdvancePC();
+                    delete [] buffer;
+                    return;
+                }
 
                 case SC_PrintFloat:
-                {
-                    int number = machine->ReadRegister(4);
-                    PrintFloat(*(float*)&number); //Convert int -> float with the same binary representation
+                {                   
+                    // Max Length of a float is 328 
+                    const int MAX_LEN = 328;
+                    char countDecimal = 0;
+                    int natural;
+                    char* buffer = new char[MAX_LEN + 1];
+                    int startPoint = 0;
+                    float digit;
+                    char* rev = new char[MAX_LEN + 1];// To read reversed number
+                    int numOfDigit = 0;
+
+                    int number_int = machine->ReadRegister(4);
+                    float number = *(float*)&number_int;
+
+                    // Take the natural part of a float number
+                    natural = (int)number;
+                    if (natural > number && number > 0)
+                        natural--;
+                    else if (natural < number && number < 0)
+                        natural++;
+
+                    // Convert natural part into a string
+                    // If the number is negative -> change it into positive and set first character of the string into "-"
+                    // increase starting point of of the string by 1 
+                    if (natural < 0)
+                    {
+                        natural = -natural;
+                        buffer[startPoint++] = '-';
+                    }
+                    // check if natural is 0
+                    else if (natural == 0)
+                    {
+                        buffer[startPoint++] = '0';
+                    }
+
+                    // Read reversed natural (natural > 0)
+                    if(natural > 0)
+                    {
+                        while(natural > 0)
+                        {
+                            digit = natural  % 10;
+                            rev[numOfDigit++] = (char)(digit + 48);
+                            natural /= 10;
+                        }
+                        // Reverse the string to get right natural part
+                        while(numOfDigit > 0)
+                        {
+                            buffer[startPoint++] = rev[--numOfDigit];
+                        }
+                    }
+
+                    delete [] rev;
+
+                    // Start reading the decimal part
+                    buffer[startPoint++] = '.';
+
+                    //Reset natural
+                    natural = (int)number;
+                    if (natural > number && number > 0)
+                        natural--;
+                    else if (natural < number && number < 0)
+                        natural++;
+
+                    number = number - natural;    // Take decimal part
+                    // Check if decimal part is 0
+                    if (number == 0.0)
+                    {
+                        buffer[startPoint++] = '0';
+                        gSynchConsole->Write(buffer, startPoint);
+                        delete [] buffer;
+                        AdvancePC();
+                        return;
+                    }
+
+                    // Read each digit of the decimal part one by one
+                    while(number != 0.0 && countDecimal < 6)
+                    {
+                        number *= 10;
+                        natural = (int)number;
+                        if (natural > number && number > 0)
+                            natural--;
+                        else if (natural < number && number < 0)
+                            natural++;
+                        buffer[startPoint++] = (char)(natural + 48);
+                        number -= natural;
+
+                        countDecimal++;
+                    }
+
+                    gSynchConsole->Write(buffer, startPoint);
+                    AdvancePC();
+                    delete [] buffer;
                 }
 
                 case SC_ReadChar:
-                    ReadChar();
+                {
+                    char c;
+                    gSynchConsole->Read(&c, 1);
+                    machine->WriteRegister(2, (int)c);
+                    AdvancePC();
+                    return;
+                }
 
                 case SC_PrintChar:
-                    PrintChar((char)machine->ReadRegister(4)); //Convert int -> char
+                {
+                    char character = (char)machine->ReadRegister(4); //Convert int -> char
+                    gSynchConsole->Write(&character, 1);
+                    AdvancePC();
+                }
 
                 case SC_ReadString:
                 {
@@ -469,7 +434,11 @@ ExceptionHandler(ExceptionType which)
                     // into buffer in system space to read
                     buffer = User2System(virtAddr, length);
 
-                    ReadString(buffer, length);
+                    //Read String
+                    gSynchConsole->Read(buffer, length);
+
+                    delete [] buffer;
+                    AdvancePC();
 
                     // Put string back to user space from system space
                     System2User(virtAddr, length, buffer);
@@ -479,13 +448,18 @@ ExceptionHandler(ExceptionType which)
                 {
                     int virtAddr;
                     char* buffer;
+                    int length;
                     // Take virtual address of string
                     virtAddr = machine->ReadRegister(4);
                     // Use function User2System to take string in user space
                     // into buffer in system space to print
                     buffer = User2System(virtAddr, 255);  // Let maxLen be 255
                    
-                    PrintString(buffer);
+                    length = strlen(buffer);
+                    gSynchConsole->Write(buffer, length);
+
+                    delete [] buffer;
+                    AdvancePC();
                 }
 
                 case SC_CreateFile:
