@@ -1,7 +1,4 @@
 #include "syscall.h"
-// C program for Merge Sort
-#include <stdio.h>
-#include <stdlib.h>
 
 // Merges two subarrays of arr[].
 // First subarray is arr[l..m]
@@ -76,8 +73,8 @@ void SaveFloat2File(float f, OpenFileId id)
 {
 	// Max Length of a float is 328 
 	int MAX_LEN = 328;
-	char* reverse = new char[MAX_LEN + 1];
-	char* buffer = new char[MAX_LEN + 1];
+	char reverse[MAX_LEN + 1];
+	char buffer[MAX_LEN + 1];
 	int bufferPos = 0, reversePos = 0;
 	char decimalCount = 0;
 	int natural;
@@ -106,7 +103,6 @@ void SaveFloat2File(float f, OpenFileId id)
 		}
 	}
 	buffer[bufferPos++] = '.';
-	delete [] reverse;
 
 	f -= (int)f;
 	if(f == 0)
@@ -127,8 +123,6 @@ void SaveFloat2File(float f, OpenFileId id)
 
 	Write(buffer, bufferPos, id);
 	Write("\r\n", 2, id);
-
-	delete [] buffer;
 }
 
 int main()
