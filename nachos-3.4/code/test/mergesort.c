@@ -129,11 +129,13 @@ int main()
 {
     int size;
     float array[100];
+	int i;
 	OpenFileId id;
 
+	i = 0;
     PrintString("Input size: ");
 	size = ReadInt();
-	for (int i = 0; i < size; i++)
+	for (i; i < size; i++)
 	{
 		PrintString("Input elements: ");
 		array[i] = ReadFloat();
@@ -144,7 +146,8 @@ int main()
 	CreateFile("mergesort.txt");
 	id = Open("mergesort.txt", 0);
 
-	for(int i = 0; i < size; i++)
+	i = 0;
+	for(i; i < size; i++)
 		SaveFloat2File(array[i], id);
 	
 	CloseFile(id);
