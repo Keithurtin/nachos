@@ -312,7 +312,8 @@ ExceptionHandler(ExceptionType which)
                     {
                         // Max Length of a float is 328 
                         const int maxLen = 328;
-                        float num = machine->ReadRegister(4);
+                        int num_int = machine->ReadRegister(4);
+                        float num = *(float*)&num_int;
                         long long natural;
                         char* buffer = new char[maxLen + 1];
                         int startPoint = 0;
