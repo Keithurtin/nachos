@@ -271,7 +271,8 @@ ExceptionHandler(ExceptionType which)
                             // User did not input a valid number
                             else
                             {
-                                machine->WriteRegister(2, 0);
+                                num = 0.0;
+                                machine->WriteRegister(2, *(int*)&num);
                                 AdvancePC();
                                 delete buffer;
                                 return;
@@ -289,7 +290,8 @@ ExceptionHandler(ExceptionType which)
                             // User did not input a valid number
                             else
                             {
-                                machine->WriteRegister(2, 0);
+                                num = 0.0;
+                                machine->WriteRegister(2, *(int*)&num);
                                 AdvancePC();
                                 delete buffer;
                                 return;
@@ -300,7 +302,7 @@ ExceptionHandler(ExceptionType which)
 
                         // Write address of the float number into register
                         // beacause register only accepts int value
-                        machine->WriteRegister(2, num);
+                        machine->WriteRegister(2, *(int*)&num);
                         AdvancePC();
                         delete buffer;
                         return;
