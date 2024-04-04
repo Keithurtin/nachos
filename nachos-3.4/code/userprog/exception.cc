@@ -340,27 +340,29 @@ ExceptionHandler(ExceptionType which)
                         // check if natural is 0
                         else if (natural == 0)
                         {
-                            buffer[0] = '0';
-                            buffer[1] = '.';
-                            startPoint = 2;
+                            buffer[startPoint++] = '0';
                         }
-                        // Read reversed natural
-                        while(natural > 0)
+
+                        if(natural > 0)
                         {
-                            digit = natural  % 10;
-                            rev[numOfDigit++] = (char)(digit + 48);
-                            natural /= 10;
+                            // Read reversed natural
+                            while(natural > 0)
+                            {
+                                digit = natural  % 10;
+                                rev[numOfDigit++] = (char)(digit + 48);
+                                natural /= 10;
+                            }
+                            // Reverse the string no get right natural part
+                            while(numOfDigit >= 0)
+                            {                             
+                                buffer[startPoint++] = rev[--numOfDigit];
+                            }
+                            delete rev;
                         }
-                        // Reverse the string no get right natural part
-                        while(numOfDigit >= 0)
-                        {
-                            
-                            buffer[startPoint++] = rev[--numOfDigit];
-                        }
-                        delete rev;
 
                         // Start reading the decimal part
                         buffer[startPoint++] = '.';
+                        natural = (int) num;
                         num = num - natural;    // Take decimal part
                         // Check if decimal part is 0
                         if (num == 0.0)
@@ -374,8 +376,7 @@ ExceptionHandler(ExceptionType which)
 
                         // Read each digit of the decimal part one by one
                         while(num != 0.0)
-                        {
-                            
+                        {                          
                             num *= 10;
                             natural = (int)num;
                             if (natural > num && num > 0)

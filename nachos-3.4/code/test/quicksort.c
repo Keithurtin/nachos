@@ -2,7 +2,6 @@
 
 int partition(int arr[], int start, int end)
 {
- 
     int pivot; 
     int count = 0;
     int i;
@@ -89,5 +88,6 @@ int main()
 		Write(buffer, size - 1, id);
 		Write("\r\n", 2, id);
 	}
+    CloseFile(id);
 	Halt();
 }
