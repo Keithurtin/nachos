@@ -86,6 +86,7 @@ class Thread {
 					// NOTE -- thread being deleted
 					// must not be running when delete 
 					// is called
+    int processID;
 
     // basic thread operations
 

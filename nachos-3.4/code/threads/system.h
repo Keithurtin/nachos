@@ -34,6 +34,14 @@ extern Timer *timer;				// the hardware alarm clock
 extern Machine* machine;	// user program memory and registers
 #include "synchcons.h"
 extern SynchConsole* gSynchConsole;		// Declare gSynchConsole pointer
+#include "bitmap.h"
+extern BitMap *gPhysPageBitMap;
+#include "synch.h"
+extern Semaphore* addrLock;
+#include "stable.h"
+extern STable* semTab;
+#include "ptable.h"
+extern PTable* pTab;
 #endif
 
 #ifdef FILESYS_NEEDED 		// FILESYS or FILESYS_STUB 
