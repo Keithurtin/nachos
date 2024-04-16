@@ -1,8 +1,5 @@
-22127113 - Nguyen Huu Gia Hieu
-22127199 - Tran Nguyen Dang Khoa
+22127199
+22127133
 22127472
 22127487
-
-Xin chao, chung minh den tu 22CLC02.
-Day la do an voi he dieu hanh Nachos cua chung minh
-Trong do an nay, chung minh phai viet cac system call cho he dieu hanh Nachos
+Ai do viet them gi do vo day gium t

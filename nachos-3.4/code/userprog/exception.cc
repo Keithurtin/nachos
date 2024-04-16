@@ -795,8 +795,66 @@ ExceptionHandler(ExceptionType which)
                         delete rev;
                         return;
                     }
-                }
 
+                    case SC_Exec:
+                    {
+                        int virtAddr;
+                        virtAddr = machine->ReadRegister(4);
+                        char* name;
+                        name = User2System(virtAddr, MaxFileLength + 1);
+
+                        if (name == NULL)
+                        {
+                            printf("Not enough memory in system\n");
+                            machine->WriteRegister(2, -1);
+                            AdvancePC();
+                            return;
+                        }
+                        // Cannot call system call SC_Open in execption.cc
+                        // so we need to open file this way
+                        OpenFile *file = fileSystem->Open(name);
+                        if (file == NULL)
+                        {
+                            printf("Cannot open this file\n");
+                            machine->WriteRegister(2, -1);
+                            AdvancePC();
+                            return;
+                        }
+
+                        int id = pTab->ExecUpdate(name);
+                        machine->WriteRegister(2, id);
+
+                        delete[] name;
+                        delete file;
+                        AdvancePC();
+                        return;
+                    }
+
+                    case SC_Join:
+                    {
+                        int id = machine->ReadRegister(4);
+                        int ans = pTab->JoinUpdate(id);
+
+                        machine->WriteRegister(2, ans);
+                        AdvancePC();
+                        return;                        
+                    }
+
+                    case SC_Exit:
+                    {
+                        int exitCode = machine->ReadRegister(4);
+
+                        if (exitCode)
+                        {
+                            AdvancePC();
+                            return;
+                        }
+                        pTab->ExitUpdate(exitCode);
+
+                        AdvancePC();
+                        return;
+                    }
+                }
        		
     }
 }
