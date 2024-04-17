@@ -805,7 +805,7 @@ ExceptionHandler(ExceptionType which)
 
                         if (name == NULL)
                         {
-                            printf("Not enough memory in system\n");
+                            printf("Name cannot be empty\n");
                             machine->WriteRegister(2, -1);
                             AdvancePC();
                             return;
@@ -851,6 +851,96 @@ ExceptionHandler(ExceptionType which)
                         }
                         pTab->ExitUpdate(exitCode);
 
+                        AdvancePC();
+                        return;
+                    }
+
+                    case SC_CreateSemaphore:
+                    {
+                        int virtAddr = machine->ReadRegister(4);
+                        int semval = machine->ReadRegister(5);
+                        char* name; 
+                        name = User2System(virtAddr, MaxFileLength + 1);
+
+                        if (name == NULL)
+                        {
+                            printf("Name cannot be empty\n");
+                            machine->WriteRegister(2, -1);
+                            AdvancePC();
+                            return;
+                        }
+
+                        int ans = semTab->Create(name ,semval);
+
+                        if (ans == -1)
+                        {
+                            printf("Cannot create semaphore\n");
+                            machine->WriteRegister(2, -1);
+                            delete[] name;
+                            AdvancePC();
+                            return;
+                        }
+
+                        delete[] name;
+                        machine->WriteRegister(2, ans);
+                        AdvancePC();
+                        return;
+                    }
+
+                    case SC_Up:
+                    {
+                        int virtAddr = machine->ReadRegister(4);
+                        char* name;
+                        name = User2System(virtAddr, MaxFileLength + 1);
+
+                        if (name == NULL)
+                        {
+                            printf("Name cannot be empty\n");
+                            machine->WriteRegister(2, -1);
+                            AdvancePC();
+                            return;
+                        }
+
+                        int ans = semTab->Signal(name);
+
+                        if (ans == -1)
+                        {
+                            machine->WriteRegister(2, -1);
+                            AdvancePC();
+                            return;
+                        }
+
+                        delete[] name;
+                        machine->WriteRegister(2, ans);
+                        AdvancePC();
+                        return;
+                    }
+
+                    case SC_Down:
+                    {
+                        int virtAddr = machine->ReadRegister(4);
+                        char* name;
+                        name = User2System(virtAddr, MaxFileLength + 1);
+
+                        if (name == NULL)
+                        {
+                            printf("Name cannot be empty\n");
+                            machine->WriteRegister(2, -1);
+                            AdvancePC();
+                            return;
+                        }
+
+                        int ans = semTab->Wait(name);
+
+                        if (ans == -1)
+                        {
+                            machine->WriteRegister(2, -1);
+                            AdvancePC();
+                            return;
+                        }
+
+                        delete[] name;
+                        machine->WriteRegister(2, ans);
                         AdvancePC();
                         return;
                     }

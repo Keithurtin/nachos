@@ -39,6 +39,9 @@
 #define SC_PrintString	18
 #define SC_Len			19
 #define SC_ToString		20
+#define SC_CreateSemaphore	21
+#define SC_Up			22
+#define SC_Down			23
 
 #ifndef IN_ASM
 
@@ -153,6 +156,12 @@ void PrintString(char* buffer);
 int Len(OpenFileId id);
 
 int ToString(char* buffer, int num);
+
+int CreateSemaphore(char* name, int semval);
+
+int Up(char* name);
+
+int Down(char* name);
 
 #endif /* IN_ASM */
 
