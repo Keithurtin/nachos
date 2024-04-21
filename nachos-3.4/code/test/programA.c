@@ -6,14 +6,10 @@ int main()
     for(i = 0; i < 1000; i++)
     {
         // print A once
-        if(Down("A") == -1)
-            return -1;
-
+        Down("A");
         PrintChar('A');
-
         // Wake programB up
-        if( Up("B") == -1 )
-            return -1;
+        Up("B");
     }
 
     return 0;
