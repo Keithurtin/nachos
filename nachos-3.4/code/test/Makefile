@@ -35,7 +35,7 @@ CPP = gcc -E
 INCDIR =-I../userprog -I../threads
 CFLAGS = -G 0 -c $(INCDIR)
 
-all: halt shell matmult sort help ascii quicksort mergesort
+all: halt shell matmult sort help ascii quicksort mergesort programA programB ping_pong
 
 start.o: start.s ../userprog/syscall.h
 	$(CPP) $(CPPFLAGS) start.c > strt.s
@@ -89,3 +89,21 @@ mergesort.o: mergesort.c
 mergesort: mergesort.o start.o
 	$(LD) $(LDFLAGS) start.o mergesort.o -o mergesort.coff
 	../bin/coff2noff mergesort.coff mergesort
+
+programA.o: programA.c
+	$(CC) $(CFLAGS) -c programA.c
+programA: programA.o start.o
+	$(LD) $(LDFLAGS) start.o programA.o -o programA.coff
+	../bin/coff2noff programA.coff programA
+
+programB.o: programB.c
+	$(CC) $(CFLAGS) -c programB.c
+programB: programB.o start.o
+	$(LD) $(LDFLAGS) start.o programB.o -o programB.coff
+	../bin/coff2noff programB.coff programB
+
+ping_pong.o: ping_pong.c
+	$(CC) $(CFLAGS) -c ping_pong.c
+ping_pong: ping_pong.o start.o
+	$(LD) $(LDFLAGS) start.o ping_pong.o -o ping_pong.coff
+	../bin/coff2noff ping_pong.coff ping_pong
